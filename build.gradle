@@ -1,4 +1,5 @@
 plugins {
+  id 'scala'
   id 'application'
 }
 
@@ -22,6 +23,8 @@ ext.versions = [
   jme3: '3.0.+',
   junit: '4.12',
   logback: '1.1.5',
+  scala: '2.11.7',
+  slf4j: '1.7.16',
   spring: '4.2.+',
 ]
 
@@ -41,9 +44,11 @@ dependencies {
   compile group: 'com.jme3', name: 'jme3-lwjgl',      version: versions.jme3
   compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
   compile group: 'org.bushe', name: 'eventbus', version: versions.eventbus
+  compile group: 'org.scala-lang', name: 'scala-library', version: versions.scala
+  compile group: 'org.slf4j', name: 'jul-to-slf4j', version: versions.slf4j
   compile group: 'org.springframework', name: 'spring-context',  version: versions.spring
 
-  testCompile group: 'junit',               name: 'junit',           version: versions.junit
+  testCompile group: 'junit', name: 'junit',           version: versions.junit
 }
 
 distributions {
