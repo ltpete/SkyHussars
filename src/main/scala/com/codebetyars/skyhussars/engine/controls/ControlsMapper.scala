@@ -3,8 +3,8 @@ package com.codebetyars.skyhussars.engine.controls
 import com.codebetyars.skyhussars.engine.controls.ControlsMapper._
 import com.codebetyars.skyhussars.utils.Logging
 import com.jme3.input.KeyInput._
-import com.jme3.input.{InputManager, MouseInput}
 import com.jme3.input.controls._
+import com.jme3.input.{InputManager, MouseInput}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 

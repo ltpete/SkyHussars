@@ -1,22 +1,26 @@
 package com.codebetyars.skyhussars
 
-
 import com.codebetyars.skyhussars.engine.SoundManager._
-import com.codebetyars.skyhussars.engine.data.Armament
 import com.jme3.math.Vector3f
 
 object SkyHussarsDataModel {
 
+  val Gravity = new Vector3f(0f, -9.81f, 0f)
+
   case class BulletDescriptor(name: String, damage: Float)
 
-  case class GunDescriptor(name: String, rateOfFire: Float, bullet: BulletDescriptor, muzzleVelocity: Float, spread: Float, sound: SoundDescriptor) extends Armament
+  case class GunDescriptor(name: String, rateOfFire: Float, bullet: BulletDescriptor, muzzleVelocity: Float, spread: Float, sound: SoundDescriptor)
   case class GunLocationDescriptor(gun: GunDescriptor, roundsMax: Int, location: Vector3f)
   case class GunGroupDescriptor(name: String, gunLocations: List[GunLocationDescriptor])
 
   case class EngineDescriptor(name: String, thrustMax: Int, sound: SoundDescriptor)
   case class EngineLocation(engine: EngineDescriptor, location: Vector3f)
 
-  case class PlaneDescriptor(name: String, engines: List[EngineLocation], guns: List[GunGroupDescriptor], massEmpty: Float, massTakeOffMax: Float, massGross: Float, internalTank: Float)
+  case class PlaneDescriptor(
+    name: String, engines: List[EngineLocation], guns: List[GunGroupDescriptor],
+    massEmpty: Float, massTakeOffMax: Float, massGross: Float, internalTank: Float,
+    length: Float, wingArea: Float, wingRatio: Float, dragFactor: Float)
+
   case class PlaneMissionDescriptor(plane: PlaneDescriptor, isPlayer: Boolean, startLocation: Vector3f, initialSpeed: Float)
 
   case class MissionDescriptor(name: String, planes: List[PlaneMissionDescriptor])
@@ -41,7 +45,11 @@ object SkyHussarsDataModel {
     massEmpty =  3593,
     massTakeOffMax =  6350,
     massGross = 5307,
-    internalTank = 1609
+    internalTank = 1609,
+    length = 10.49f,
+    wingArea = 22.07f,
+    wingRatio = 6.37f,
+    dragFactor = 0.2566f
   )
 
   // ...lists

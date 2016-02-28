@@ -10,7 +10,7 @@ class FlowControls(var game: Mission) extends ActionListener {
     if (isPressed) name match {
       case GAME_PAUSE => game.paused = !game.paused
       case GAME_CAMERA =>
-      case GAME_RESET => game.initializeScene()
+      case GAME_RESET =>
     }
   }
 

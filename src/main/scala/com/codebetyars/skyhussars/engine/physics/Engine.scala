@@ -1,22 +1,19 @@
 package com.codebetyars.skyhussars.engine.physics
 
+import com.codebetyars.skyhussars.SkyHussarsDataModel.EngineLocation
 import com.jme3.math.Vector3f
 
 import scala.beans.BeanProperty
-//remove if not needed
 
-class Engine(private var engineLocation: EngineLocation) extends ThrustProducer with RigidBody {
+class Engine(engineLocation: EngineLocation) extends ThrustProducer with RigidBody {
 
   @BeanProperty
-  var centerOfGravity: Vector3f = engineLocation.getLocation
+  var throttle: Float = 0.0f
 
-  private var vMaxThrust: Vector3f = new Vector3f(0, 0, engineLocation.getEngineDescriptor.getThrustMax)
+  val vMaxThrust= new Vector3f(0, 0, engineLocation.engine.thrustMax)
 
-  private var throttle: Float = 0.0f
+  def getThrust = vMaxThrust.mult(throttle)
 
-  override def getThrust(): Vector3f = vMaxThrust.mult(throttle)
+  def getCenterOfGravity: Vector3f = engineLocation.location
 
-  override def setThrottle(throttle: Float) {
-    this.throttle = throttle
-  }
 }

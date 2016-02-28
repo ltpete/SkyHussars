@@ -19,25 +19,17 @@ class MainMenu extends GameState with ScreenController {
 
   private var time: Float = 0
 
-  override def update(tpf: Float): GameState = {
-    var nextState: GameState = this
-    if (guiManager.gameStarted) {
-      nextState = pendingMission
-      guiManager.startGame()
-    }
-    nextState
+  def update(tpf: Float): GameState = {
+    if (guiManager.isGameRunning) pendingMission else this
   }
 
-  override def close() {
-  }
-
-  override def initialize() {
-    guiManager.stopGame()
+  def initialize() {
+    guiManager.setGameRunning(false)
     guiManager.cursor(true)
   }
 
   def startGame() {
-    guiManager.startGame()
+    guiManager.setGameRunning(true)
   }
 
   def bind(nifty: Nifty, screen: Screen) {
@@ -48,4 +40,8 @@ class MainMenu extends GameState with ScreenController {
 
   def onEndScreen() {
   }
+
+  def close() {
+  }
+
 }

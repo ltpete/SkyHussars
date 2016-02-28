@@ -3,99 +3,53 @@ package com.codebetyars.skyhussars.engine.physics
 import java.text.NumberFormat
 
 import com.codebetyars.skyhussars.SkyHussarsDataModel._
-import com.codebetyars.skyhussars.engine.physics.AdvancedPlanePhysics._
-import com.jme3.math.{FastMath, Matrix3f, Quaternion, Vector3f}
+import com.codebetyars.skyhussars.engine.plane.Plane
+import com.codebetyars.skyhussars.utils.Logging
+import WorldPhysicsData._
+
+import com.jme3.math._
 import com.jme3.scene.Spatial
-import org.slf4j.LoggerFactory
 
-object AdvancedPlanePhysics {
+class AdvancedPlanePhysics(plane: Plane) extends PlanePhysics with Logging {
 
-  private val logger = LoggerFactory.getLogger(classOf[AdvancedPlanePhysics])
+  def mass = plane.mass // mass can change during flight
+  val wingArea = plane.planeDescriptor.wingArea
+  val wingRatio = plane.planeDescriptor.wingRatio
+  val length = plane.planeDescriptor.length
+  val rPlane: Float = 1.3f // update name
 
-  private val GRAVITY = new Vector3f(0f, -10f, 0f)
-}
+  var altitude = 0.0f
+  var angleOfAttack = 0.0f
+  var vVelocity = new Vector3f
+  var vAcceleration = new Vector3f
+  var vDrag = new Vector3f
+  var vLift = new Vector3f
+  var vAngularAcceleration = new Vector3f
+  var vAngularVelocity = new Vector3f
 
-class AdvancedPlanePhysics(planeDescriptor: PlaneDescriptor)
-    extends PlanePhysics {
+  val momentOfInertiaTensor = new Matrix3f(
+    (mass / 12) * (3 * rPlane * rPlane + length * length), 0f, 0f,
+    0f, (mass / 12) * (3 * rPlane * rPlane + length * length), 0f,
+    0f, 0f, (mass / 2) * (rPlane * rPlane)
+  )
 
-  private var airDensity: Float = 1.2745f
+  // these should be plane specific
+  val leftWing: SymmetricAirfoil = new SymmetricAirfoil("WingA", new Vector3f(-2.0f, 0, -0.2f), wingArea / 2, 1f, wingRatio, true, 0f)
+  val rightWing: SymmetricAirfoil = new SymmetricAirfoil("WingB", new Vector3f(2.0f, 0, -0.2f), wingArea / 2, 1f, wingRatio, true, 0f)
+  val horizontalStabilizer: SymmetricAirfoil = new SymmetricAirfoil("HorizontalStabilizer", new Vector3f(0, 0, -6.0f), 5f, -3f, wingRatio / 1.5f, false, 0f)
+  val verticalStabilizer: SymmetricAirfoil = new SymmetricAirfoil("VerticalStabilizer", new Vector3f(0, 0, -6.0f), 5.0f, 0f, wingRatio / 1.5f, false, 90f)
 
-  private var planeFactor: Float = 0.2566f
+  val airfoils = List(leftWing, rightWing, horizontalStabilizer, verticalStabilizer)
+  val engines = plane.planeDescriptor.engines.map(new Engine(_))
 
-  private var wingArea: Float = 22.07f
-
-  private var mass: Float = planeDescriptor.massGross
-
-  private var vWeight: Vector3f = GRAVITY.mult(mass)
-
-  private var aspectRatio: Float = 6.37f
-
-  private var pi: Float = 3.14f
-
-  private var angleOfAttack: Float = _
-
-  private var vVelocity: Vector3f = new Vector3f(0f, 0f, 0f)
-
-  private var vAcceleration: Vector3f = new Vector3f(0f, 0f, 0f)
-
-  private var vDrag: Vector3f = new Vector3f(0f, 0f, 0f)
-
-  private var vLift: Vector3f = new Vector3f(0f, 0f, 0f)
-
-  private var vAngularAcceleration: Vector3f = new Vector3f(0, 0, 0)
-
-  private var vAngularVelocity: Vector3f = new Vector3f(0, 0, 0)
-
-  private var height: Float = _
-
-  private var length: Float = 10.49f
-
-  private var rPlane: Float = 1.3f
-
-  private var momentOfInertiaTensor: Matrix3f = new Matrix3f((mass / 12) * (3 * rPlane * rPlane + length * length), 
-    0f, 0f, 0f, (mass / 12) * (3 * rPlane * rPlane + length * length), 0f, 0f, 0f, (mass / 2) * (rPlane * rPlane))
-
-  private var airfoils: List[Airfoil] = new ArrayList()
-
-  private var engines: List[Engine] = new ArrayList()
-
-  var leftWing: SymmetricAirfoil = new SymmetricAirfoil("WingA", new Vector3f(-2.0f, 0, -0.2f), wingArea / 2, 
-    1f, aspectRatio, true, 0f)
-
-  var rightWing: SymmetricAirfoil = new SymmetricAirfoil("WingB", new Vector3f(2.0f, 0, -0.2f), wingArea / 2, 
-    1f, aspectRatio, true, 0f)
-
-  var horizontalStabilizer: SymmetricAirfoil = new SymmetricAirfoil("HorizontalStabilizer", new Vector3f(0, 
-    0, -6.0f), 5f, -3f, aspectRatio / 1.5f, false, 0f)
-
-  var verticalStabilizer: SymmetricAirfoil = new SymmetricAirfoil("VerticalStabilizer", new Vector3f(0, 
-    0, -6.0f), 5.0f, 0f, aspectRatio / 1.5f, false, 90f)
-
-  airfoils.add(leftWing)
-
-  airfoils.add(rightWing)
-
-  airfoils.add(horizontalStabilizer)
-
-  airfoils.add(verticalStabilizer)
-
-  for (engineLocation <- planeDescriptor.getEngineLocations) {
-    engines.add(new Engine(engineLocation))
-  }
-
-  override def update(tpf: Float, model: Spatial) {
+   def update(model: Spatial, tpf: Float) {
     updateAuxiliary(model)
     var vLinearAcceleration = Vector3f.ZERO
-    logger.debug("Plane roll: " + 
-      (model.getLocalRotation.mult(Vector3f.UNIT_X).cross(Vector3f.UNIT_Z.negate())
-      .angleBetween(Vector3f.UNIT_Y) * 
-      FastMath.RAD_TO_DEG))
+    logger.debug("Plane roll: " + (model.getLocalRotation.mult(Vector3f.UNIT_X).cross(Vector3f.UNIT_Z.negate()).angleBetween(Vector3f.UNIT_Y) * FastMath.RAD_TO_DEG))
     val engineForces = calculateEngineForces(model.getLocalRotation)
     val airfoilForces = calculateAirfoilForces(model.getLocalRotation, vVelocity.negate())
-    logger.debug("Airfoil linear: " + airfoilForces.vLinearComponent.length + 
-      ", torque: " + 
-      airfoilForces.vTorqueComponent.length)
-    vLinearAcceleration = vLinearAcceleration.add(vWeight)
+    logger.debug("Airfoil linear: " + airfoilForces.vLinearComponent.length + ", torque: " + airfoilForces.vTorqueComponent.length)
+    vLinearAcceleration = vLinearAcceleration.add(Gravity.mult(mass))
     vLinearAcceleration = vLinearAcceleration.add(engineForces.vLinearComponent)
     vLinearAcceleration = vLinearAcceleration.add(airfoilForces.vLinearComponent)
     vLinearAcceleration = vLinearAcceleration.add(calculateParasiticDrag())
@@ -105,26 +59,16 @@ class AdvancedPlanePhysics(planeDescriptor: PlaneDescriptor)
     vAngularAcceleration = momentOfInertiaTensor.invert().mult(airfoilForces.vTorqueComponent)
     vAngularVelocity = vAngularVelocity.add(vAngularAcceleration.mult(tpf))
     logger.debug("Angular velocity: " + vAngularVelocity)
-    moderateRoll()
-    model.rotate(vAngularVelocity.x * tpf, vAngularVelocity.y * tpf, vAngularVelocity.z * tpf)
-  }
 
-  private def moderateRoll() {
-    if (vAngularVelocity.x > 2) {
-      vAngularVelocity.x = 2
-    } else if (vAngularVelocity.x < -2) {
-      vAngularVelocity.x = -2
-    }
-    if (vAngularVelocity.y > 2) {
-      vAngularVelocity.y = 2
-    } else if (vAngularVelocity.y < -2) {
-      vAngularVelocity.y = -2
-    }
-    if (vAngularVelocity.z > 2) {
-      vAngularVelocity.z = 2
-    } else if (vAngularVelocity.z < -2) {
-      vAngularVelocity.z = -2
-    }
+    vAngularVelocity.set(
+      FastMath.clamp(vAngularVelocity.x, -2, 2),
+      FastMath.clamp(vAngularVelocity.y, -2, 2),
+      FastMath.clamp(vAngularVelocity.z, -2, 2)
+    )
+    logger.debug("Moderated angular velocity: " + vAngularVelocity)
+
+
+    model.rotate(vAngularVelocity.x * tpf, vAngularVelocity.y * tpf, vAngularVelocity.z * tpf)
   }
 
   private def calculateEngineForces(situation: Quaternion): ActingForces = {
@@ -139,11 +83,11 @@ class AdvancedPlanePhysics(planeDescriptor: PlaneDescriptor)
     var vLinearAcceleration = Vector3f.ZERO
     var vTorque = Vector3f.ZERO
     for (airfoil <- airfoils) {
-      var airfoilForce = airfoil.calculateResultantForce(airDensity, vFlow, situation, vAngularVelocity)
+      var airfoilForce = airfoil.calculateResultantForce(AirDensity(altitude), vFlow, situation, vAngularVelocity)
       logger.debug("Airfoilforce points to: " + airfoilForce.toString)
       vLinearAcceleration = vLinearAcceleration.add(airfoilForce)
       airfoilForce = situation.inverse().mult(airfoilForce)
-      val distFromCenter = airfoil.getCenterOfGravity
+      val distFromCenter = airfoil.getCenterOfGravity()
       logger.debug("Airfoilforce points to: " + airfoilForce.toString)
       vTorque = vTorque.add(distFromCenter.cross(airfoilForce))
     }
@@ -151,17 +95,16 @@ class AdvancedPlanePhysics(planeDescriptor: PlaneDescriptor)
   }
 
   private def calculateParasiticDrag(): Vector3f = {
-    vVelocity.negate().normalize().mult(airDensity * planeFactor * vVelocity.lengthSquared())
+    vVelocity.negate().normalize().mult(AirDensity(altitude) * plane.planeDescriptor.dragFactor * vVelocity.lengthSquared())
   }
 
   private def updateAuxiliary(model: Spatial) {
     updateHelpers(model)
     updateAngleOfAttack(model)
-    updatePlaneFactor()
   }
 
   private def updateAngleOfAttack(model: Spatial) {
-    angleOfAttack = model.getLocalRotation.mult(Vector3f.UNIT_Z).angleBetween(vVelocity.normalize()) * 
+    angleOfAttack = model.getLocalRotation.mult(Vector3f.UNIT_Z).angleBetween(vVelocity.normalize()) *
       FastMath.RAD_TO_DEG
     val np = model.getLocalRotation.mult(Vector3f.UNIT_Y).dot(vVelocity.negate().normalize())
     if (np < 0) {
@@ -169,13 +112,8 @@ class AdvancedPlanePhysics(planeDescriptor: PlaneDescriptor)
     }
   }
 
-  def updatePlaneFactor() {
-    planeFactor = 0.2566f
-  }
-
   private def updateHelpers(model: Spatial) {
-    height = model.getWorldTranslation.getY
-    airDensity = WorldPhysicsData.getAirDensity(height.toInt)
+    altitude = model.getWorldTranslation.getY
   }
 
   override def setThrust(throttle: Float) {
@@ -209,16 +147,16 @@ class AdvancedPlanePhysics(planeDescriptor: PlaneDescriptor)
     val bigFractionless = NumberFormat.getInstance
     bigFractionless.setMaximumFractionDigits(0)
     bigFractionless.setMinimumIntegerDigits(6)
-    "Thrust: " + engines.get(0).getThrust.length + ", Acceleration: " + 
-      accF.format(vAcceleration.length) + 
-      ", CurrentSpeed: " + 
-      fractionless.format(vVelocity.length) + 
-      ", CurrentSpeed km/h: " + 
-      fractionless.format(vVelocity.length * 3.6) + 
-      ", Drag: " + 
-      bigFractionless.format(vDrag.length) + 
-      ", Height: " + 
-      fractionless.format(height) + 
+    "Thrust: " + engines.head.getThrust.length + ", Acceleration: " +
+      accF.format(vAcceleration.length) +
+      ", CurrentSpeed: " +
+      fractionless.format(vVelocity.length) +
+      ", CurrentSpeed km/h: " +
+      fractionless.format(vVelocity.length * 3.6) +
+      ", Drag: " +
+      bigFractionless.format(vDrag.length) +
+      ", Height: " +
+      fractionless.format(altitude) +
       ", Lift: " + 
       bigFractionless.format(vLift.length) + 
       ", AOA: " + 

@@ -12,43 +12,22 @@ class Mission(var planes: List[Plane],
               var guiManager: GuiManager,
               var dayLightWeatherManager: DayLightWeatherManager) extends GameState {
 
-  var player: Pilot = _
+  val player = new Pilot(planes.find(_.planeMission.isPlayer).get)
 
   var paused: Boolean = false
 
-  private var ended: Boolean = false
+  var ended: Boolean = false
 
-  private var pilots: List[Pilot] = _
-
-  for (plane <- planes if plane.planeMissionDescriptor.player) {
-    player = new Pilot(plane)
-  }
-
-  initiliazePlayer()
-
-  def initializeScene() {
-    initiliazePlayer()
-    ended = false
-  }
-
-  private def initiliazePlayer() {
-    cameraManager.moveCameraTo(player.plane.getLocation)
-    cameraManager.followWithCamera(player.plane.getNode)
-    cameraManager.init()
-  }
-
-  override def update(tpf: Float): GameState = {
+  def update(tpf: Float) = {
     if (!paused && !ended) {
       for (plane <- planes) {
         plane.update(tpf)
-        if (terrainManager.checkCollisionWithGround(plane)) {
-          plane.crashed(true)
-        }
+        plane.setCrashed(terrainManager.checkCollisionWithGround(plane))
       }
+
       projectileManager.update(tpf)
-      if (player.plane.crashed) {
-        ended = true
-      }
+      ended = player.plane.getCrashed
+
       guiManager.update(player.plane.getSpeedKmH)
     } else {
       soundManager.muteAllSounds()
@@ -57,14 +36,18 @@ class Mission(var planes: List[Plane],
     this
   }
 
-  override def close() {
-  }
+  def initialize() {
+    cameraManager.moveCameraTo(player.plane.getLocation)
+    cameraManager.followWithCamera(player.plane.node)
+    cameraManager.init()
 
-  override def initialize() {
-    initializeScene()
     guiManager.switchScreen("main")
     guiManager.cursor(false)
+
     ended = false
+  }
+
+  def close() {
   }
 
 }

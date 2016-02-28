@@ -1,10 +1,9 @@
 package com.codebetyars.skyhussars.engine.plane
 
-import com.jme3.scene.Node
-
 import com.codebetyars.skyhussars.SkyHussarsDataModel.PlaneMissionDescriptor
-import com.codebetyars.skyhussars.engine.{ModelManager, SoundManager}
 import com.codebetyars.skyhussars.engine.weapons.ProjectileManager
+import com.codebetyars.skyhussars.engine.{ModelManager, SoundManager}
+import com.jme3.scene.Node
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 

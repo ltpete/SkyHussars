@@ -3,47 +3,42 @@ package com.codebetyars.skyhussars.engine
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.codebetyars.skyhussars.engine.GuiManager._
+import com.codebetyars.skyhussars.utils.Logging
 import com.jme3.asset.AssetManager
 import com.jme3.audio.AudioRenderer
 import com.jme3.input.InputManager
 import com.jme3.niftygui.NiftyJmeDisplay
 import com.jme3.renderer.ViewPort
-import de.lessvoid.nifty.{Nifty, NiftyEventSubscriber}
 import de.lessvoid.nifty.controls.{DropDown, DropDownSelectionChangedEvent}
 import de.lessvoid.nifty.elements.render.TextRenderer
 import de.lessvoid.nifty.screen.{Screen, ScreenController}
-import org.slf4j.LoggerFactory
+import de.lessvoid.nifty.{Nifty, NiftyEventSubscriber}
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-//remove if not needed
 
-object GuiManager {
-
-  private val logger = LoggerFactory.getLogger(classOf[GuiManager])
-}
+import scala.beans.BooleanBeanProperty
 
 @Component
-class GuiManager extends ScreenController with InitializingBean {
+class GuiManager extends ScreenController with InitializingBean with Logging {
 
   @Autowired
-  private var assetManager: AssetManager = _
+  var assetManager: AssetManager = _
 
   @Autowired
-  private var inputManager: InputManager = _
+  var inputManager: InputManager = _
 
   @Autowired
-  private var audioRenderer: AudioRenderer = _
+  var audioRenderer: AudioRenderer = _
 
   @Autowired
-  private var guiViewPort: ViewPort = _
+  var guiViewPort: ViewPort = _
 
   @Autowired
-  private var cameraManager: CameraManager = _
+  var cameraManager: CameraManager = _
 
   @Autowired
-  private var dayLightWeatherManager: DayLightWeatherManager = _
+  var dayLightWeatherManager: DayLightWeatherManager = _
 
   private var nifty: Nifty = _
 
@@ -102,13 +97,7 @@ class GuiManager extends ScreenController with InitializingBean {
   def onEndScreen() {
   }
 
-  var gameStarted: Boolean = false
+  @BooleanBeanProperty
+  var gameRunning: Boolean = false
 
-  def startGame() {
-    gameStarted = true
-  }
-
-  def stopGame() {
-    gameStarted = true
-  }
 }

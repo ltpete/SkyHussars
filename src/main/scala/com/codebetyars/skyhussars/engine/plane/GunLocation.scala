@@ -13,17 +13,16 @@ class GunLocation(gunLocationDescriptor: GunLocationDescriptor, projectileManage
   val random: Random = new Random()
 
   def addSpread(vVelocity: Vector3f): Vector3f = {
-    val spread = gunLocationDescriptor.gunDescriptor.spread * random.nextGaussian().toFloat * vVelocity.length / 100f
+    val spread = gunLocationDescriptor.gun.spread * random.nextGaussian().toFloat * vVelocity.length / 100f
     new Ring(vVelocity, vVelocity.normalize(), spread, spread).random()
   }
 
-  def firing(firing: Boolean, vLocation: Vector3f, vVelocity: Vector3f, vOrientation: Quaternion) {
-    if (firing) {
-      val vBulletLocation = vLocation.add(vOrientation.mult(gunLocationDescriptor.location))
-      val vMuzzleVelocity = vOrientation.mult(Vector3f.UNIT_Z).mult(gunLocationDescriptor.gunDescriptor.muzzleVelocity)
-      val vBulletVelocity = addSpread(vVelocity.add(vMuzzleVelocity))
-      val bullet = new Bullet(vBulletLocation, vBulletVelocity, null)
-      projectileManager.addProjectile(bullet)
-    }
+  def fire(vLocation: Vector3f, vVelocity: Vector3f, vOrientation: Quaternion) {
+    val vBulletLocation = vLocation.add(vOrientation.mult(gunLocationDescriptor.location))
+    val vMuzzleVelocity = vOrientation.mult(Vector3f.UNIT_Z).mult(gunLocationDescriptor.gun.muzzleVelocity)
+    val vBulletVelocity = addSpread(vVelocity.add(vMuzzleVelocity))
+    val bullet = new Bullet(vBulletLocation, vBulletVelocity, null)
+    projectileManager.addProjectile(bullet)
   }
+
 }
