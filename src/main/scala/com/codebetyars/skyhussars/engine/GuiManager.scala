@@ -55,7 +55,7 @@ class GuiManager extends ScreenController with InitializingBean with Logging {
     nifty.update()
     val timeControl = nifty.getScreen("start").findNiftyControl("timeControl", classOf[DropDown[String]])
     timeControl.addItem("Now")
-    for (i <- 0 until 23) {
+    for (i <- 0 until 24) {
       timeControl.addItem((if (i < 10) "0" + i else i) + ":00")
     }
     guiViewPort.addProcessor(niftyDisplay)
@@ -72,9 +72,7 @@ class GuiManager extends ScreenController with InitializingBean with Logging {
   }
 
   def update(speed: String) {
-    nifty.getCurrentScreen.findElementByName("speedDisplay")
-      .getRenderer(classOf[TextRenderer])
-      .setText(speed + "km/h")
+    nifty.getCurrentScreen.findElementByName("speedDisplay").getRenderer(classOf[TextRenderer]).setText(speed + "km/h")
   }
 
   def switchScreen(screenId: String) {
@@ -95,6 +93,10 @@ class GuiManager extends ScreenController with InitializingBean with Logging {
   }
 
   def onEndScreen() {
+  }
+
+  def startGame() {
+    setGameRunning(true)
   }
 
   @BooleanBeanProperty
