@@ -6,6 +6,8 @@ import com.codebetyars.skyhussars.engine.{ModelManager, SoundManager}
 import com.jme3.scene.Node
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import ModelManager.Models.Spatials._
+import ModelManager.Models.Materials._
 
 @Component
 class PlaneFactory {
@@ -16,9 +18,9 @@ class PlaneFactory {
   @Autowired var projectileManager: ProjectileManager = _
 
   def createPlane(planeMission: PlaneMissionDescriptor): Plane = {
-    val model = modelManager.model("p80", "p80_material").clone()
+    val model = modelManager.createModel(P80, P80Material).clone()
 
-    // we wire the first engine's and gun's sound untile further requirement
+    // wire the first engine's and gun's sound until further requirement
     val engineSound = soundManager.sound(planeMission.plane.engines.head.engine.sound)
     val gunSound = soundManager.sound(planeMission.plane.guns.head.gunLocations.head.gun.sound)
 

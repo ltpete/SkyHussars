@@ -90,7 +90,7 @@ class SymmetricAirfoilTest extends Logging {
     logger.debug("getCenterOfGravity")
     val instance: SymmetricAirfoil = null
     val expResult: Vector3f = null
-    val result = instance.getCenterOfGravity()
+    val result = instance.getCenterOfGravity
     assertEquals(expResult, result)
     fail("The test case is a prototype.")
   }
@@ -100,7 +100,7 @@ class SymmetricAirfoilTest extends Logging {
     logger.debug("getName")
     val instance: SymmetricAirfoil = null
     val expResult = ""
-    val result = instance.getName
+    val result = instance.name
     assertEquals(expResult, result)
     fail("The test case is a prototype.")
   }

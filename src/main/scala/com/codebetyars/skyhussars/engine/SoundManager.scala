@@ -57,4 +57,5 @@ class SoundManager extends InitializingBean {
   def muteAllSounds() {
     requestedNodes.foreach(_.stop())
   }
+
 }

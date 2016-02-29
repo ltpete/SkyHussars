@@ -1,24 +1,9 @@
 package com.codebetyars.skyhussars.engine.physics
 
-import com.codebetyars.skyhussars.engine.physics.SymmetricAirfoil._
+import com.codebetyars.skyhussars.utils.Logging
 import com.jme3.math.{FastMath, Quaternion, Vector3f}
-import org.slf4j.LoggerFactory
 
-import scala.beans.BeanProperty
-//remove if not needed
-
-object SymmetricAirfoil {
-
-  private val logger = LoggerFactory.getLogger(classOf[SymmetricAirfoil])
-}
-
-class SymmetricAirfoil(@BeanProperty var name: String, 
-    private var cog: Vector3f, 
-    private var wingArea: Float, 
-    private var incidence: Float, 
-    private var aspectRatio: Float, 
-    private var damper: Boolean, 
-    dihedralDegree: Float) extends Airfoil {
+class SymmetricAirfoil(val name: String, cog: Vector3f, wingArea: Float, incidence: Float, aspectRatio: Float, damper: Boolean, dihedralDegree: Float) extends Airfoil with Logging {
 
   if (damper) {
     leftDamper = if (this.cog.dot(Vector3f.UNIT_X) < 0) true else false
@@ -40,12 +25,9 @@ class SymmetricAirfoil(@BeanProperty var name: String,
 
   private var leftDamper: Boolean = _
 
-  logger.debug(name + " pointing to " + qIncidence.mult(dihedral).mult(Vector3f.UNIT_Y))
+  debug(name + " pointing to " + qIncidence.mult(dihedral).mult(Vector3f.UNIT_Y))
 
-  override def calculateResultantForce(airDensity: Float, 
-      vFlow0: Vector3f,
-      situation: Quaternion, 
-      vAngularVelocity: Vector3f): Vector3f = {
+  override def calculateResultantForce(airDensity: Float, vFlow0: Vector3f, situation: Quaternion, vAngularVelocity: Vector3f): Vector3f = {
     val foil = situation.mult(wingRotation).mult(qAileron)
     val vUp = foil.mult(Vector3f.UNIT_Y).normalize()
     val vFlow = addDamping(vFlow0, vAngularVelocity, vUp)
@@ -123,13 +105,11 @@ class SymmetricAirfoil(@BeanProperty var name: String,
   }
 
   def calculateInducedDrag(airDensity: Float, vFlow: Vector3f, vLift: Vector3f): Vector3f = {
-    val dividened = (0.5f * airDensity * aspectRatio * vFlow.lengthSquared() * 
-      FastMath.PI * 
-      wingArea)
+    val dividened = 0.5f * airDensity * aspectRatio * vFlow.lengthSquared() * FastMath.PI * wingArea
     if (dividened == 0) {
       return Vector3f.ZERO
     }
-    val scInducedDrag = (vLift.lengthSquared()) / dividened
+    val scInducedDrag = vLift.lengthSquared() / dividened
     vFlow.normalize().mult(scInducedDrag)
   }
 
@@ -137,7 +117,7 @@ class SymmetricAirfoil(@BeanProperty var name: String,
     throw new UnsupportedOperationException("Not supported yet.")
   }
 
-  def getCenterOfGravity(): Vector3f = cog
+  def getCenterOfGravity: Vector3f = cog
 
   private def calculateAngleOfAttack(vUp: Vector3f, vFlow: Vector3f): Float = {
     var angleOfAttack = vFlow.cross(vUp).cross(vFlow).normalize().angleBetween(vUp) * 

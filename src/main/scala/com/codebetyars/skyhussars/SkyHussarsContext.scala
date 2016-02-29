@@ -11,7 +11,6 @@ import com.jme3.scene.Node
 import jme3utilities.sky.SkyControl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.{Bean, ComponentScan, Configuration}
-//remove if not needed
 
 @Configuration
 @ComponentScan

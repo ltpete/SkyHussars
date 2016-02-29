@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import scala.beans.BeanProperty
-//remove if not needed
+
 
 @Component
 class TerrainManager extends InitializingBean {

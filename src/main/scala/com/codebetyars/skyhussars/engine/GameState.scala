@@ -1,10 +1,11 @@
 package com.codebetyars.skyhussars.engine
 
-abstract class GameState {
+trait GameState {
+
+  def initialize(): Unit
 
   def update(tpf: Float): GameState
 
   def close(): Unit
 
-  def initialize(): Unit
 }

@@ -1,11 +1,13 @@
 package com.codebetyars.skyhussars
 
+import java.util.logging.{Level, Logger, LogManager}
+
 import com.codebetyars.skyhussars.utils.Logging
 import com.jme3.app.SimpleApplication
 import com.jme3.renderer.RenderManager
 import com.jme3.system.AppSettings
+import org.slf4j.bridge.SLF4JBridgeHandler
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
-//remove if not needed
 
 object SkyHussars extends Logging {
 
@@ -15,6 +17,12 @@ object SkyHussars extends Logging {
     settings.setSettingsDialogImage("Textures/settings_image.jpg")
     val application = new SkyHussars()
     application.setSettings(settings)
+
+    LogManager.getLogManager.reset()
+    SLF4JBridgeHandler.removeHandlersForRootLogger()
+    SLF4JBridgeHandler.install()
+    Logger.getLogger("global").setLevel(Level.FINEST)
+
     info("Starting SkyHussars...")
     application.start()
   }

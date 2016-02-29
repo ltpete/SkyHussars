@@ -6,13 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import scala.beans.BeanProperty
-//remove if not needed
 
 @Component
 class MainMenu extends GameState with ScreenController {
 
   @Autowired
-  private var guiManager: GuiManager = _
+  var guiManager: GuiManager = _
 
   @BeanProperty
   var pendingMission: GameState = _

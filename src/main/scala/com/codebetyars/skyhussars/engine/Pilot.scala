@@ -23,4 +23,5 @@ class Pilot(var plane: Plane) {
   def setRudder(rudder: Float): Unit = {
     plane.setRudder(rudder)
   }
+
 }

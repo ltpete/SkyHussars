@@ -48,7 +48,7 @@ dependencies {
   compile group: 'org.slf4j', name: 'jul-to-slf4j', version: versions.slf4j
   compile group: 'org.springframework', name: 'spring-context',  version: versions.spring
 
-  testCompile group: 'junit', name: 'junit',           version: versions.junit
+  testCompile group: 'junit', name: 'junit', version: versions.junit
 }
 
 distributions {

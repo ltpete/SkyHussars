@@ -40,9 +40,8 @@ class GuiManager extends ScreenController with InitializingBean with Logging {
   @Autowired
   var dayLightWeatherManager: DayLightWeatherManager = _
 
-  private var nifty: Nifty = _
-
-  private var niftyDisplay: NiftyJmeDisplay = _
+  var niftyDisplay: NiftyJmeDisplay = _
+  var nifty: Nifty = _
 
   override def afterPropertiesSet() {
     niftyDisplay = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, guiViewPort)
@@ -53,11 +52,11 @@ class GuiManager extends ScreenController with InitializingBean with Logging {
     nifty.fromXml("Interface/BasicGUI.xml", "start", this)
     nifty.addControls()
     nifty.update()
+
     val timeControl = nifty.getScreen("start").findNiftyControl("timeControl", classOf[DropDown[String]])
-    timeControl.addItem("Now")
-    for (i <- 0 until 24) {
-      timeControl.addItem((if (i < 10) "0" + i else i) + ":00")
-    }
+
+    Seq("Now") ++ (0 until 24).map {i => (if (i < 10) "0" else "") + s"$i:00"} foreach timeControl.addItem
+
     guiViewPort.addProcessor(niftyDisplay)
   }
 

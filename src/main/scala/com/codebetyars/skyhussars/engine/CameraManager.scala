@@ -6,35 +6,31 @@ import com.jme3.renderer.Camera
 import com.jme3.scene.Spatial
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-//remove if not needed
 
 @Component
 class CameraManager {
 
   @Autowired
-  private var camera: Camera = _
+  var camera: Camera = _
 
   @Autowired
-  private var flyByCamera: FlyByCamera = _
+  var flyByCamera: FlyByCamera = _
 
-  private var fovChangeActive: Boolean = _
+  var fovChangeActive: Boolean = false
+  var fovChangeRate: Float = 8f
+  var fovNarrowing: Boolean = false
+  val minFov = 20
+  val maxFov = 100
+  var fov: Float = 0f
 
-  private var fovNarrowing: Boolean = _
-
-  private val minFov = 20
-
-  private val maxFov = 100
-
-  private var fovChangeRate: Float = 8f
-
-  var focus: Spatial = _
+  var focus: Spatial = null
 
   def update(tpf: Float) {
     follow()
     updateFov(tpf)
   }
 
-  private def updateFov(tpf: Float) {
+  def updateFov(tpf: Float) {
     if (fovChangeActive) {
       if (fovNarrowing && fov > minFov) {
         setFov(fov - fovChangeRate * tpf)
@@ -45,9 +41,9 @@ class CameraManager {
     }
   }
 
-  private def follow() {
+  def follow() {
     val cameraLocation = new Vector3f(0, 3.5f, -12)
-    camera.setLocation((focus.getWorldTranslation).add(focus.getLocalRotation.mult(cameraLocation)))
+    camera.setLocation(focus.getWorldTranslation.add(focus.getLocalRotation.mult(cameraLocation)))
     camera.lookAt(focus.getWorldTranslation, focus.getLocalRotation.mult(Vector3f.UNIT_Y))
   }
 
@@ -61,13 +57,9 @@ class CameraManager {
     this.focus = spatial
   }
 
-  private var aspect: Float = _
-
-  var fov: Float = 0f
-
-  private var near: Float = 0.1f
-
-  private var far: Float = 200000f
+  val near: Float = 0.1f
+  val far: Float = 200000f
+  var aspect: Float = 1f
 
   def initializeCamera() {
     aspect = camera.getWidth.toFloat / camera.getHeight.toFloat
@@ -98,4 +90,5 @@ class CameraManager {
   }
 
   def flyCamActive(): Boolean = flyByCamera.isEnabled
+
 }

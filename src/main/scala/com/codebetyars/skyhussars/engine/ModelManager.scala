@@ -1,7 +1,8 @@
 package com.codebetyars.skyhussars.engine
 
-import java.util.{HashMap, Map}
+import com.codebetyars.skyhussars.engine.ModelManager.{MaterialDescriptor, SpatialDescriptor}
 
+import scala.collection.mutable
 import com.jme3.asset.AssetManager
 import com.jme3.material.Material
 import com.jme3.math.ColorRGBA
@@ -9,7 +10,28 @@ import com.jme3.scene.Spatial
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-//remove if not needed
+
+object ModelManager {
+  case class SpatialDescriptor(spatialFileLocation: String)
+  case class MaterialDescriptor(materialFileLocation: String, shininess: Float, useMaterialColors: Boolean, colorAmbient: ColorRGBA, colorDiffuse: ColorRGBA, colorSpecular: ColorRGBA, textureFileLocation: String)
+
+  object Models {
+    object Spatials {
+      object P80 extends SpatialDescriptor("Models/p80/p80_16_game.j3o")
+    }
+    object Materials {
+      object P80Material extends MaterialDescriptor(
+        "Common/MatDefs/Light/Lighting.j3md",
+        shininess = 100f,
+        useMaterialColors = true,
+        colorAmbient = ColorRGBA.Gray,
+        colorDiffuse = ColorRGBA.Gray,
+        colorSpecular = ColorRGBA.Gray,
+        textureFileLocation = "Textures/p80.png"
+      )
+    }
+  }
+}
 
 @Component
 class ModelManager extends InitializingBean {
@@ -17,35 +39,38 @@ class ModelManager extends InitializingBean {
   @Autowired
   private var assetManager: AssetManager = _
 
-  private var spatials: Map[String, Spatial] = new HashMap()
+  val spatials = mutable.Map[SpatialDescriptor, Spatial]()
 
-  private var materials: Map[String, Material] = new HashMap()
+  val materials = mutable.Map[MaterialDescriptor, Material]()
 
   override def afterPropertiesSet() {
-    loadModels()
-    loadMaterials()
+    val allSpatials = List[SpatialDescriptor] (
+      ModelManager.Models.Spatials.P80
+    )
+    val allMaterials = List[MaterialDescriptor] (
+      ModelManager.Models.Materials.P80Material
+    )
+
+    allSpatials.foreach { sd =>
+      spatials += sd -> assetManager.loadModel(sd.spatialFileLocation)
+    }
+
+    allMaterials.foreach { md =>
+      val material = new Material(assetManager, md.materialFileLocation)
+      material.setFloat("Shininess", md.shininess)
+      material.setBoolean("UseMaterialColors", md.useMaterialColors)
+      material.setColor("Ambient", md.colorAmbient)
+      material.setColor("Diffuse", md.colorDiffuse)
+      material.setColor("Specular", md.colorSpecular)
+      material.setTexture("DiffuseMap", assetManager.loadTexture(md.textureFileLocation))
+      materials += md -> material
+    }
   }
 
-  private def loadModels() {
-    val p80 = assetManager.loadModel("Models/p80/p80_16_game.j3o")
-    spatials.put("p80", p80)
-  }
-
-  private def loadMaterials() {
-    val material = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md")
-    val texture = assetManager.loadTexture("Textures/p80.png")
-    material.setFloat("Shininess", 100f)
-    material.setBoolean("UseMaterialColors", true)
-    material.setColor("Ambient", ColorRGBA.Gray)
-    material.setColor("Diffuse", ColorRGBA.Gray)
-    material.setColor("Specular", ColorRGBA.Gray)
-    material.setTexture("DiffuseMap", texture)
-    materials.put("p80_material", material)
-  }
-
-  def model(modelName: String, materialName: String): Spatial = {
-    val model = spatials.get(modelName).clone()
-    model.setMaterial(materials.get(materialName))
+  def createModel(spatial: SpatialDescriptor, material: MaterialDescriptor): Spatial = {
+    val model = spatials(spatial).clone()
+    model.setMaterial(materials(material))
     model
   }
+
 }

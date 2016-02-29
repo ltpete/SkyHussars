@@ -9,7 +9,7 @@ class CameraControls(private var cameraManager: CameraManager) extends ActionLis
   override def onAction(name: String, isPressed: Boolean, tpf: Float) {
     name match {
       case CAMERA_INCREASE_FOV => cameraManager.setFovChangeActive(active = isPressed, fovNarrowing = false)
-      case CAMERA_INCREASE_FOV => cameraManager.setFovChangeActive(active = isPressed, fovNarrowing = true)
+      case CAMERA_DECREASE_FOV => cameraManager.setFovChangeActive(active = isPressed, fovNarrowing = true)
     }
   }
 

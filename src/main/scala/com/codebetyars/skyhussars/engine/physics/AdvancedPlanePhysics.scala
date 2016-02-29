@@ -60,7 +60,7 @@ class AdvancedPlanePhysics(plane: Plane) extends PlanePhysics with Logging {
     vAngularVelocity = vAngularVelocity.add(vAngularAcceleration.mult(tpf))
     logger.debug("Angular velocity: " + vAngularVelocity)
 
-    vAngularVelocity.set(
+    vAngularVelocity = vAngularVelocity.set(
       FastMath.clamp(vAngularVelocity.x, -2, 2),
       FastMath.clamp(vAngularVelocity.y, -2, 2),
       FastMath.clamp(vAngularVelocity.z, -2, 2)
@@ -72,11 +72,7 @@ class AdvancedPlanePhysics(plane: Plane) extends PlanePhysics with Logging {
   }
 
   private def calculateEngineForces(situation: Quaternion): ActingForces = {
-    var vLinearAcceleration = Vector3f.ZERO
-    for (engine <- engines) {
-      vLinearAcceleration = vLinearAcceleration.add(situation.mult(engine.getThrust))
-    }
-    new ActingForces(vLinearAcceleration, Vector3f.ZERO)
+    new ActingForces(engines.map(_.getThrust).map(situation.mult).foldLeft(Vector3f.ZERO) { (a, b) => a.add(b) } , Vector3f.ZERO)
   }
 
   private def calculateAirfoilForces(situation: Quaternion, vFlow: Vector3f): ActingForces = {
@@ -87,7 +83,7 @@ class AdvancedPlanePhysics(plane: Plane) extends PlanePhysics with Logging {
       logger.debug("Airfoilforce points to: " + airfoilForce.toString)
       vLinearAcceleration = vLinearAcceleration.add(airfoilForce)
       airfoilForce = situation.inverse().mult(airfoilForce)
-      val distFromCenter = airfoil.getCenterOfGravity()
+      val distFromCenter = airfoil.getCenterOfGravity
       logger.debug("Airfoilforce points to: " + airfoilForce.toString)
       vTorque = vTorque.add(distFromCenter.cross(airfoilForce))
     }
@@ -147,24 +143,17 @@ class AdvancedPlanePhysics(plane: Plane) extends PlanePhysics with Logging {
     val bigFractionless = NumberFormat.getInstance
     bigFractionless.setMaximumFractionDigits(0)
     bigFractionless.setMinimumIntegerDigits(6)
-    "Thrust: " + engines.head.getThrust.length + ", Acceleration: " +
-      accF.format(vAcceleration.length) +
-      ", CurrentSpeed: " +
-      fractionless.format(vVelocity.length) +
-      ", CurrentSpeed km/h: " +
-      fractionless.format(vVelocity.length * 3.6) +
-      ", Drag: " +
-      bigFractionless.format(vDrag.length) +
-      ", Height: " +
-      fractionless.format(altitude) +
-      ", Lift: " + 
-      bigFractionless.format(vLift.length) + 
-      ", AOA: " + 
-      fractionless.format(angleOfAttack) + 
-      ", AngularVelocity: " + 
-      fraction2Format.format(vAngularVelocity.length) + 
-      ", AngularAcceleration: " + 
-      fraction2Format.format(vAngularAcceleration.length)
+
+    "Thrust: " + engines.head.getThrust.length +
+    ", Acceleration: " + accF.format(vAcceleration.length) +
+    ", CurrentSpeed: " + fractionless.format(vVelocity.length) +
+    ", CurrentSpeed km/h: " + fractionless.format(vVelocity.length * 3.6) +
+    ", Drag: " + bigFractionless.format(vDrag.length) +
+    ", Height: " + fractionless.format(altitude) +
+    ", Lift: " + bigFractionless.format(vLift.length) +
+    ", AOA: " + fractionless.format(angleOfAttack) +
+    ", AngularVelocity: " + fraction2Format.format(vAngularVelocity.length) +
+    ", AngularAcceleration: " + fraction2Format.format(vAngularAcceleration.length)
   }
 
   override def setElevator(aileron: Float) {
@@ -187,3 +176,5 @@ class AdvancedPlanePhysics(plane: Plane) extends PlanePhysics with Logging {
 
   override def getVVelovity(): Vector3f = vVelocity
 }
+
+case class ActingForces(vLinearComponent: Vector3f, vTorqueComponent: Vector3f)

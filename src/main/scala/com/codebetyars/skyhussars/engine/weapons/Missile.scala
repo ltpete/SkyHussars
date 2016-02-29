@@ -8,11 +8,11 @@ class Missile extends Projectile {
     throw new UnsupportedOperationException("Not supported yet.")
   }
 
-  def getLocation(): Vector3f = {
+  def getLocation: Vector3f = {
     throw new UnsupportedOperationException("Not supported yet.")
   }
 
-  def getVelocity(): Vector3f = {
+  def getVelocity: Vector3f = {
     throw new UnsupportedOperationException("Not supported yet.")
   }
 

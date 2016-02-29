@@ -10,7 +10,7 @@ import com.jme3.scene.{Node, Spatial}
 
 import scala.beans.BeanProperty
 
-class Plane(model: Spatial, val planeMission: PlaneMissionDescriptor, gunSound: AudioNode, engineSound: AudioNode, projectileManager: ProjectileManager) extends Logging {
+class Plane(model: Spatial, val planeMission: PlaneMissionDescriptor, engineSound: AudioNode, gunSound: AudioNode, projectileManager: ProjectileManager) extends Logging {
 
   val node: Node = new Node()
 
@@ -18,11 +18,11 @@ class Plane(model: Spatial, val planeMission: PlaneMissionDescriptor, gunSound: 
 
   val physics: PlanePhysics = new AdvancedPlanePhysics(this)
 
-  var gunGroups = planeDescriptor.guns.map(new GunGroup(_, projectileManager))
+  val gunGroups = planeDescriptor.guns.map(new GunGroup(_, projectileManager))
 
-  var missiles = List[Missile]() // not supported yet
+  val missiles = List[Missile]() // not supported yet
 
-  var bombs = List[Bomb]() // not supported yet
+  val bombs = List[Bomb]() // not supported yet
 
   var mass = planeDescriptor.massGross
 

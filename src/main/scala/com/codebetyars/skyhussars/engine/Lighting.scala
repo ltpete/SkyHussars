@@ -1,7 +1,5 @@
 package com.codebetyars.skyhussars.engine
 
-import java.util.{LinkedList, List}
-
 import com.codebetyars.skyhussars.utils.Logging
 import com.jme3.light.{AmbientLight, DirectionalLight, Light, PointLight}
 import com.jme3.math.{ColorRGBA, FastMath, Vector3f}
@@ -16,50 +14,50 @@ import scala.beans.BeanProperty
 class Lighting extends InitializingBean with Logging {
 
   @Autowired
-  private var skyControl: SkyControl = _
+  var skyControl: SkyControl = _
 
-  @BeanProperty
-  var lights: List[Light] = _
+  val directionalLight = new DirectionalLight
+  directionalLight.setColor(ColorRGBA.White.mult(0.5f))
+  directionalLight.setDirection(new Vector3f(0.0f, -1.0f, 0.0f))
 
-  private var directionalLight: DirectionalLight = _
+  val ambientLight = new AmbientLight
+  ambientLight.setColor(ColorRGBA.White.mult(0.5f))
 
-  private var ambientLight: AmbientLight = _
+  val pointLight = new PointLight
 
-  private var pointLight: PointLight = _
+  val lights = List(directionalLight, ambientLight)
 
-  override def afterPropertiesSet() {
-    directionalLight = new DirectionalLight()
-    directionalLight.setColor(ColorRGBA.White.mult(0.5f))
-    directionalLight.setDirection(new Vector3f(0.0f, -1.0f, 0.0f))
-    ambientLight = new AmbientLight()
-    ambientLight.setColor(ColorRGBA.White.mult(0.5f))
-    pointLight = new PointLight()
-    lights = new LinkedList()
-    lights.add(directionalLight)
-    lights.add(ambientLight)
+  override def afterPropertiesSet(): Unit = {
     setLightingBodies(skyControl.getSunAndStars.getSunDirection, skyControl.getMoonDirection)
   }
 
   def setLightingBodies(sun: Vector3f, moon: Vector3f) {
     val sunAt = sun.angleBetween(Vector3f.UNIT_Y)
     val moonAt = moon.angleBetween(Vector3f.UNIT_Y)
-    logger.debug("Sun at: " + sunAt + ", moon at: " + moonAt)
+
+    directionalLight.setColor(ColorRGBA.White.mult(0.5f))
+    directionalLight.setDirection(new Vector3f(0.0f, -1.0f, 0.0f))
+    ambientLight.setColor(ColorRGBA.White.mult(0.5f))
+
     if (sunAt < FastMath.HALF_PI) {
-      directionalLight.setDirection(sun.negate())
       val lightStrength = ColorRGBA.White.mult(1f - sunAt / 4f)
+      directionalLight.setDirection(sun.negate())
       directionalLight.setColor(lightStrength)
       ambientLight.setColor(lightStrength)
     } else if (moonAt < FastMath.HALF_PI) {
-      directionalLight.setDirection(moon.negate())
       val lightStrength = ColorRGBA.White.mult(0.25f - moonAt / 6f)
+      directionalLight.setDirection(moon.negate())
       directionalLight.setColor(lightStrength)
       ambientLight.setColor(lightStrength)
     } else {
-      directionalLight.setDirection(Vector3f.UNIT_Y.negate())
       val lightStrength = ColorRGBA.White.mult(0.24f)
+      directionalLight.setDirection(Vector3f.UNIT_Y.negate())
       directionalLight.setColor(lightStrength)
       ambientLight.setColor(lightStrength)
     }
+
+    logger.debug("Sun at: " + sunAt + ", moon at: " + moonAt)
     logger.debug("Direction of light: " + directionalLight.getDirection)
   }
+
 }
