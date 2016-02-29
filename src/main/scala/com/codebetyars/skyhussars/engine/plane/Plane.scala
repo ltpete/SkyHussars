@@ -1,7 +1,7 @@
 package com.codebetyars.skyhussars.engine.plane
 
 import com.codebetyars.skyhussars.SkyHussarsDataModel._
-import com.codebetyars.skyhussars.engine.physics.{AdvancedPlanePhysics, PlanePhysics}
+import com.codebetyars.skyhussars.engine.physics.AdvancedPlanePhysics
 import com.codebetyars.skyhussars.engine.weapons.{Bomb, Missile, ProjectileManager}
 import com.codebetyars.skyhussars.utils.Logging
 import com.jme3.audio.AudioNode
@@ -16,7 +16,7 @@ class Plane(model: Spatial, val planeMission: PlaneMissionDescriptor, engineSoun
 
   val planeDescriptor = planeMission.plane
 
-  val physics: PlanePhysics = new AdvancedPlanePhysics(this)
+  val physics = new AdvancedPlanePhysics(this)
 
   val gunGroups = planeDescriptor.guns.map(new GunGroup(_, projectileManager))
 

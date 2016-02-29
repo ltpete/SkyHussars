@@ -10,7 +10,7 @@ import WorldPhysicsData._
 import com.jme3.math._
 import com.jme3.scene.Spatial
 
-class AdvancedPlanePhysics(plane: Plane) extends PlanePhysics with Logging {
+class AdvancedPlanePhysics(plane: Plane) extends Logging {
 
   def mass = plane.mass // mass can change during flight
   val wingArea = plane.planeDescriptor.wingArea
@@ -112,13 +112,13 @@ class AdvancedPlanePhysics(plane: Plane) extends PlanePhysics with Logging {
     altitude = model.getWorldTranslation.getY
   }
 
-  override def setThrust(throttle: Float) {
+  def setThrust(throttle: Float) {
     for (engine <- engines) {
       engine.setThrottle(throttle)
     }
   }
 
-  override def getSpeedKmH(): String = {
+  def getSpeedKmH = {
     val fractionless = NumberFormat.getInstance
     fractionless.setMaximumFractionDigits(0)
     fractionless.setMinimumIntegerDigits(3)
@@ -128,7 +128,7 @@ class AdvancedPlanePhysics(plane: Plane) extends PlanePhysics with Logging {
     fractionless.format(vVelocity.length * 3.6)
   }
 
-  override def getInfo(): String = {
+  def getInfo = {
     val fraction2Format = NumberFormat.getInstance
     fraction2Format.setMaximumFractionDigits(2)
     fraction2Format.setMinimumFractionDigits(2)
@@ -156,16 +156,16 @@ class AdvancedPlanePhysics(plane: Plane) extends PlanePhysics with Logging {
     ", AngularAcceleration: " + fraction2Format.format(vAngularAcceleration.length)
   }
 
-  override def setElevator(aileron: Float) {
+  def setElevator(aileron: Float) {
     horizontalStabilizer.controlAileron(5f * aileron)
   }
 
-  override def setSpeedForward(model: Spatial, kmh: Float) {
+  def setSpeedForward(model: Spatial, kmh: Float) {
     vVelocity = model.getLocalRotation.mult(Vector3f.UNIT_Z).normalize()
       .mult(kmh / 3.6f)
   }
 
-  override def setAileron(aileron: Float) {
+  def setAileron(aileron: Float) {
     leftWing.controlAileron(aileron)
     rightWing.controlAileron(-1f * aileron)
   }
@@ -174,7 +174,7 @@ class AdvancedPlanePhysics(plane: Plane) extends PlanePhysics with Logging {
     verticalStabilizer.controlAileron(aileron)
   }
 
-  override def getVVelovity(): Vector3f = vVelocity
+  def getVVelovity = vVelocity
 }
 
 case class ActingForces(vLinearComponent: Vector3f, vTorqueComponent: Vector3f)

@@ -5,10 +5,6 @@ import com.jme3.math.{FastMath, Quaternion, Vector3f}
 
 class SymmetricAirfoil(val name: String, cog: Vector3f, wingArea: Float, incidence: Float, aspectRatio: Float, damper: Boolean, dihedralDegree: Float) extends Airfoil with Logging {
 
-  if (damper) {
-    leftDamper = if (this.cog.dot(Vector3f.UNIT_X) < 0) true else false
-  }
-
   private var aoa: Array[Int] = Array(0, 2, 4, 6, 8, 10, 12, 30)
 
   private var clm05: Array[Float] = Array(0f, 0.246f, 0.475f, 0.68f, 0.775f, 0.795f, 0.778f, 0.8f)
@@ -23,7 +19,7 @@ class SymmetricAirfoil(val name: String, cog: Vector3f, wingArea: Float, inciden
 
   private var dampingFactor: Float = 1f
 
-  private var leftDamper: Boolean = _
+  val leftDamper: Boolean = cog.dot(Vector3f.UNIT_X) < 0
 
   debug(name + " pointing to " + qIncidence.mult(dihedral).mult(Vector3f.UNIT_Y))
 
