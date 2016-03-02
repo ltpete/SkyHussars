@@ -156,18 +156,17 @@ class AdvancedPlanePhysics(plane: Plane) extends Logging {
     ", AngularAcceleration: " + fraction2Format.format(vAngularAcceleration.length)
   }
 
+  def setSpeedForward(model: Spatial, kmh: Float) {
+    vVelocity = model.getLocalRotation.mult(Vector3f.UNIT_Z).normalize().mult(kmh / 3.6f)
+  }
+
   def setElevator(aileron: Float) {
     horizontalStabilizer.controlAileron(5f * aileron)
   }
 
-  def setSpeedForward(model: Spatial, kmh: Float) {
-    vVelocity = model.getLocalRotation.mult(Vector3f.UNIT_Z).normalize()
-      .mult(kmh / 3.6f)
-  }
-
   def setAileron(aileron: Float) {
-    leftWing.controlAileron(aileron)
-    rightWing.controlAileron(-1f * aileron)
+    leftWing.controlAileron(+aileron)
+    rightWing.controlAileron(-aileron)
   }
 
   def setRudder(aileron: Float) {

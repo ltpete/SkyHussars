@@ -16,8 +16,8 @@ object ControlsMapper {
   val CAMERA_INCREASE_FOV = "IncreaseFov"
   val CAMERA_DECREASE_FOV = "DecreaseFov"
 
-  val CONTROL_NOSE_UP = "NoseDown"
-  val CONTROL_NOSE_DOWN = "NoseUp"
+  val CONTROL_NOSE_UP = "NoseUp"
+  val CONTROL_NOSE_DOWN = "NoseDown"
   val CONTROL_ROTATE_LEFT = "RotateLeft"
   val CONTROL_ROTATE_RIGHT = "RotateRight"
   val CONTROL_RUDDER_LEFT = "RudderLeft"
@@ -65,12 +65,12 @@ class ControlsMapper extends Logging {
 
   def setupFlightKeyboardControls(flightKeyboardControls: FlightKeyboardControls) {
     registerKeys(flightKeyboardControls, Map(
-      KEY_UP    -> CONTROL_NOSE_UP,
-      KEY_DOWN  -> CONTROL_NOSE_DOWN,
+      KEY_UP    -> CONTROL_NOSE_DOWN,
+      KEY_DOWN  -> CONTROL_NOSE_UP,
       KEY_LEFT  -> CONTROL_ROTATE_LEFT,
       KEY_RIGHT -> CONTROL_ROTATE_RIGHT,
-      KEY_W     -> CONTROL_NOSE_UP,
-      KEY_S     -> CONTROL_NOSE_DOWN,
+      KEY_W     -> CONTROL_NOSE_DOWN,
+      KEY_S     -> CONTROL_NOSE_UP,
       KEY_A     -> CONTROL_ROTATE_LEFT,
       KEY_D     -> CONTROL_ROTATE_RIGHT,
       KEY_Q     -> CONTROL_RUDDER_LEFT,

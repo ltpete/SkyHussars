@@ -16,8 +16,6 @@ class Plane(model: Spatial, val planeMission: PlaneMissionDescriptor, engineSoun
 
   val planeDescriptor = planeMission.plane
 
-  val physics = new AdvancedPlanePhysics(this)
-
   val gunGroups = planeDescriptor.guns.map(new GunGroup(_, projectileManager))
 
   val missiles = List[Missile]() // not supported yet
@@ -31,6 +29,8 @@ class Plane(model: Spatial, val planeMission: PlaneMissionDescriptor, engineSoun
 
   @BeanProperty
   var crashed: Boolean = false
+
+  val physics = new AdvancedPlanePhysics(this)
 
   this.physics.setSpeedForward(model, planeMission.initialSpeed)
 

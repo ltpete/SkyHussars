@@ -4,19 +4,19 @@ import com.codebetyars.skyhussars.engine._
 import com.codebetyars.skyhussars.engine.plane.Plane
 import com.codebetyars.skyhussars.engine.weapons.ProjectileManager
 
-class Mission(var planes: List[Plane],
-              var projectileManager: ProjectileManager,
-              var soundManager: SoundManager,
-              var cameraManager: CameraManager,
-              var terrainManager: TerrainManager,
-              var guiManager: GuiManager,
-              var dayLightWeatherManager: DayLightWeatherManager) extends GameState {
+class Mission(val planes: List[Plane],
+              val projectileManager: ProjectileManager,
+              val soundManager: SoundManager,
+              val cameraManager: CameraManager,
+              val terrainManager: TerrainManager,
+              val guiManager: GuiManager,
+              val dayLightWeatherManager: DayLightWeatherManager) extends GameState {
 
   val player = new Pilot(planes.find(_.planeMission.isPlayer).get)
-
   var paused: Boolean = false
-
   var ended: Boolean = false
+
+  initializeCamera()
 
   def update(tpf: Float) = {
     if (!paused && !ended) {
@@ -36,13 +36,17 @@ class Mission(var planes: List[Plane],
     this
   }
 
-  def initialize() {
+  def initializeCamera(): Unit = {
     cameraManager.moveCameraTo(player.plane.getLocation)
     cameraManager.followWithCamera(player.plane.node)
     cameraManager.init()
+  }
 
+  def initialize() {
     guiManager.switchScreen("main")
     guiManager.cursor(false)
+
+    initializeCamera()
 
     ended = false
   }
